@@ -4,13 +4,17 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+
 
 @TeleOp
 public class FalconsTeleOp extends LinearOpMode {
     //Initialize motors, servos, sensors, imus, etc.
-    DcMotorEx motorLF, motorRF, motorLB, motorRB;
+    DcMotorEx motorLF, motorRF, motorLB, motorRB, belt, ball, rhino;
     // TODO: Uncomment the following line if you are using servos
     //Servo Claw;
+    Servo pusher;
 
     public static MecanumDrive.Params DRIVE_PARAMS = new MecanumDrive.Params();
 
@@ -25,9 +29,12 @@ public class FalconsTeleOp extends LinearOpMode {
         motorLB = (DcMotorEx) hardwareMap.dcMotor.get(DRIVE_PARAMS.leftBackDriveName);
         motorRF = (DcMotorEx) hardwareMap.dcMotor.get(DRIVE_PARAMS.rightFrontDriveName);
         motorRB = (DcMotorEx) hardwareMap.dcMotor.get(DRIVE_PARAMS.rightBackDriveName);
-
+        belt = (DcMotorEx) hardwareMap.dcMotor.get("belt");
+        ball = (DcMotorEx) hardwareMap.dcMotor.get("intake");
+        rhino = (DcMotorEx)  hardwareMap.dcMotor.get("launch_ball");
         // Use the following line as a template for defining new servos
         //Claw = (Servo) hardwareMap.servo.get("claw");
+        pusher = (Servo) hardwareMap.servo.get("pusher");
 
         //Set them to the correct modes
         //This reverses the motor direction
@@ -36,7 +43,9 @@ public class FalconsTeleOp extends LinearOpMode {
         motorLB.setDirection(DRIVE_PARAMS.leftBackDriveDirection);
         motorRF.setDirection(DRIVE_PARAMS.rightFrontDriveDirection);
         motorRB.setDirection(DRIVE_PARAMS.rightBackDriveDirection);
-
+        belt.setDirection(DcMotorSimple.Direction.FORWARD);
+        ball.setDirection(DcMotorSimple.Direction.FORWARD);
+        rhino.setDirection(DcMotorSimple.Direction.FORWARD);
         //This resets the encoder values when the code is initialized
         motorLF.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motorLB.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -48,6 +57,9 @@ public class FalconsTeleOp extends LinearOpMode {
         motorLB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         motorRF.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         motorRB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        belt.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        ball.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rhino.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //This lets you look at encoder values while the OpMode is active
         //If you have a STOP_AND_RESET_ENCODER, make sure to put this below it
@@ -56,22 +68,40 @@ public class FalconsTeleOp extends LinearOpMode {
         motorRF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorRB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-
+        boolean reverseDrive = false;
+        boolean lastLeftBumper = false;
         // The program will pause here until the Play icon is pressed on the Driver Station
         waitForStart();
+
 
         // opModeIsActive() returns "true" as long as the Stop button has not been pressed on the Driver Station
         while(opModeIsActive()) {
 
+            boolean slowMode = gamepad1.right_bumper;
             // Mecanum drive code
             double powerX = 0.0;  // Desired power for strafing           (-1 to 1)
             double powerY = 0.0;  // Desired power for forward/backward   (-1 to 1)
             double powerAng = 0.0;  // Desired power for turning          (-1 to 1)
 
+            if (gamepad1.left_bumper && !lastLeftBumper)
+            {
+                reverseDrive = !reverseDrive;
+            }
+            lastLeftBumper = gamepad1.left_bumper;
+
+            if (!reverseDrive)
+            {
+                powerAng = gamepad1.right_stick_x;
+            }
+            else
+            {
+                powerAng = -gamepad1.right_stick_x;
+            }
+
             // Set the desired powers based on joystick inputs (-1 to 1)
             powerX = gamepad1.left_stick_x;
             powerY = -gamepad1.left_stick_y;
-            powerAng = -gamepad1.right_stick_x;
+
 
             // Perform vector math to determine the desired powers for each wheel
             double powerLF = powerX + powerY - powerAng;
@@ -90,21 +120,102 @@ public class FalconsTeleOp extends LinearOpMode {
             powerLB /= max;
             powerRF /= max;
             powerRB /= max;
+            //gooofy lefty
 
-            motorLF.setPower(powerLF);
-            motorLB.setPower(powerLB);
-            motorRF.setPower(powerRF);
-            motorRB.setPower(powerRB);
+            if (slowMode)
+            {
+                powerLF /= 10;
+                powerLB /= 10;
+                powerRF /= 10;
+                powerRB /= 10;
+            }
+
+            if (!reverseDrive)
+            {
+                motorLF.setPower(-powerLF);
+                motorLB.setPower(-powerLB);
+                motorRF.setPower(-powerRF);
+                motorRB.setPower(-powerRB);
+            }
+            else
+            {
+                motorLF.setPower(powerLF);
+                motorLB.setPower(powerLB);
+                motorRF.setPower(powerRF);
+                motorRB.setPower(powerRB);
+            }
 
 
+            // goofy belt
+            boolean beltUp = gamepad2.dpad_up;
+            boolean beltBown = gamepad2.dpad_down;
 
+            if(beltUp)
+            {
+                belt.setPower(1);
+            }
+            else if(beltBown)
+            {
+                belt.setPower(-1);
+            }
+            else {
+                belt.setPower(0);
+            }
+
+            boolean intake = gamepad2.x;
+            boolean outake = gamepad2.a;
+
+            if(intake)
+            {
+                ball.setPower(1);
+            }
+            else if(outake)
+            {
+                ball.setPower(-1);
+            }
+            else
+            {
+                ball.setPower(0);
+            }
+
+            boolean launch_ball = gamepad2.right_bumper;
+            boolean reverse_launcher = gamepad2.left_bumper;
+            if(launch_ball)
+            {
+                rhino.setPower(.90);
+            }
+            else if (reverse_launcher)
+            {
+                rhino.setPower(.65);
+            }
+            else
+            {
+                rhino.setPower(0);
+            }
+
+            boolean pusherIn = gamepad2.dpad_right;
+            boolean pusherOut = gamepad2.dpad_left;
+
+            if (pusherOut)
+            {
+                pusher.setPosition(.25);
+            }
+            else
+            {
+                pusher.setPosition(.75);
+            }
             // If you want to print information to the Driver Station, use telemetry
             // addData() lets you give a string which is automatically followed by a ":" when printed
             //     the variable that you list after the comma will be displayed next to the label
             // update() only needs to be run once and will "push" all of the added data
 
-            //telemetry.addData("Label", "Information");
-            //telemetry.update();
+            telemetry.addData("PerpEncoderTicks",ball.getCurrentPosition());
+            telemetry.addData("ParEncoderTicks", rhino.getCurrentPosition());
+            telemetry.addData("LF power", powerLF);
+            telemetry.addData("LB power", powerLB);
+            telemetry.addData("RF power", powerRF);
+            telemetry.addData("RB power", powerRB);
+            telemetry.update();
 
         } // opModeActive loop ends
     }
