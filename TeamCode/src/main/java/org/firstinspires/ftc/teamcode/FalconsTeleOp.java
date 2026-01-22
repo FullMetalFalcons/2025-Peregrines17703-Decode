@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 
 @TeleOp
@@ -17,6 +18,8 @@ public class FalconsTeleOp extends LinearOpMode {
     Servo pusher;
 
     public static MecanumDrive.Params DRIVE_PARAMS = new MecanumDrive.Params();
+
+    private VoltageSensor voltageSensor;
 
 
     // The following code will run as soon as "INIT" is pressed on the Driver Station
@@ -35,6 +38,9 @@ public class FalconsTeleOp extends LinearOpMode {
         // Use the following line as a template for defining new servos
         //Claw = (Servo) hardwareMap.servo.get("claw");
         pusher = (Servo) hardwareMap.servo.get("pusher");
+
+        voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+
 
         //Set them to the correct modes
         //This reverses the motor direction
@@ -76,6 +82,7 @@ public class FalconsTeleOp extends LinearOpMode {
 
         // opModeIsActive() returns "true" as long as the Stop button has not been pressed on the Driver Station
         while(opModeIsActive()) {
+
 
             boolean slowMode = gamepad1.right_bumper;
             // Mecanum drive code
@@ -178,15 +185,19 @@ public class FalconsTeleOp extends LinearOpMode {
                 ball.setPower(0);
             }
 
+            double multiplier = 13/voltageSensor.getVoltage();
+
             boolean launch_ball = gamepad2.right_bumper;
             boolean reverse_launcher = gamepad2.left_bumper;
             if(launch_ball)
             {
-                rhino.setPower(.90);
+                multiplier = 13/voltageSensor.getVoltage();
+                rhino.setPower(.75 * multiplier);
             }
             else if (reverse_launcher)
             {
-                rhino.setPower(.65);
+                multiplier = 13/voltageSensor.getVoltage();
+                rhino.setPower(.6 * multiplier);
             }
             else
             {
@@ -215,6 +226,7 @@ public class FalconsTeleOp extends LinearOpMode {
             telemetry.addData("LB power", powerLB);
             telemetry.addData("RF power", powerRF);
             telemetry.addData("RB power", powerRB);
+            telemetry.addData("Launcher power", (.65 * multiplier));
             telemetry.update();
 
         } // opModeActive loop ends

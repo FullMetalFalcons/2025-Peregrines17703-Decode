@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -16,6 +17,7 @@ public class PeregrineShooter {
 
     private DcMotorEx launcher, intake, belt;
     private Servo pusher;
+    VoltageSensor voltageSensor;
 
     public PeregrineShooter(HardwareMap hardwareMap, Telemetry telemetry)
     {
@@ -26,6 +28,8 @@ public class PeregrineShooter {
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         belt.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
         pusher = (Servo) hardwareMap.servo.get("pusher");
     }
