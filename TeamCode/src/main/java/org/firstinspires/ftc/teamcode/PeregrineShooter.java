@@ -28,6 +28,10 @@ public class PeregrineShooter {
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         belt.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher.setVelocityPIDFCoefficients(/*15*/ 800, 0, /*1*/0, 0  /*20*/);
 
         voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
@@ -148,7 +152,7 @@ public class PeregrineShooter {
 
             if (System.nanoTime() < startInNS + TimeUnit.MILLISECONDS.toNanos((long) ((launcherTime) * 1000)))
             {
-                launcher.setPower(launcherPower);
+                launcher.setVelocity(launcherPower);
                 return true;
             }
             else

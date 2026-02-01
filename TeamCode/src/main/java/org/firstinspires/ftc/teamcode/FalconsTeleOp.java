@@ -8,11 +8,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 
 @TeleOp
 public class FalconsTeleOp extends LinearOpMode {
     //Initialize motors, servos, sensors, imus, etc.
     DcMotorEx motorLF, motorRF, motorLB, motorRB, belt, ball, rhino;
+
     // TODO: Uncomment the following line if you are using servos
     //Servo Claw;
     Servo pusher;
@@ -57,6 +60,7 @@ public class FalconsTeleOp extends LinearOpMode {
         motorLB.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motorRF.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motorRB.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        rhino.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //This makes the wheels tense up and stay in position when it is not moving, opposite is FLOAT
         motorLF.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -73,6 +77,8 @@ public class FalconsTeleOp extends LinearOpMode {
         motorLB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorRF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorRB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rhino.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rhino.setVelocityPIDFCoefficients(/*15*/ 800, 0, /*1*/0, 50  /*20*/);
 
         boolean reverseDrive = false;
         boolean lastLeftBumper = false;
@@ -191,13 +197,17 @@ public class FalconsTeleOp extends LinearOpMode {
             boolean reverse_launcher = gamepad2.left_bumper;
             if(launch_ball)
             {
-                multiplier = 13/voltageSensor.getVoltage();
-                rhino.setPower(.75 * multiplier);
+                /*multiplier = 13/voltageSensor.getVoltage();
+                rhino.setPower(.75 * multiplier);*/
+                rhino.setVelocity(1800);
             }
             else if (reverse_launcher)
             {
-                multiplier = 13/voltageSensor.getVoltage();
-                rhino.setPower(.6 * multiplier);
+                /*multiplier = 13/voltageSensor.getVoltage();
+                rhino.setPower(.57 * multiplier);*/
+                //rhino.setVelocity(20520, AngleUnit.DEGREES);
+                rhino.setVelocity(1400);
+
             }
             else
             {
@@ -220,8 +230,8 @@ public class FalconsTeleOp extends LinearOpMode {
             //     the variable that you list after the comma will be displayed next to the label
             // update() only needs to be run once and will "push" all of the added data
 
-            telemetry.addData("PerpEncoderTicks",ball.getCurrentPosition());
-            telemetry.addData("ParEncoderTicks", rhino.getCurrentPosition());
+            telemetry.addData("PerpEncoderTicks",belt.getCurrentPosition());
+            telemetry.addData("Launcher Encoder Ticks", rhino.getCurrentPosition());
             telemetry.addData("LF power", powerLF);
             telemetry.addData("LB power", powerLB);
             telemetry.addData("RF power", powerRF);
