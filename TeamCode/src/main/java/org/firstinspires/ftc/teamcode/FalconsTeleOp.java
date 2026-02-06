@@ -8,6 +8,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import com.qualcomm.robotcore.hardware.IMU;
+import com.acmerobotics.roadrunner.ftc.LazyHardwareMapImu;
+import com.acmerobotics.roadrunner.ftc.LazyImu;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
@@ -15,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class FalconsTeleOp extends LinearOpMode {
     //Initialize motors, servos, sensors, imus, etc.
     DcMotorEx motorLF, motorRF, motorLB, motorRB, belt, ball, rhino;
+    IMU imu;
 
     // TODO: Uncomment the following line if you are using servos
     //Servo Claw;
@@ -23,6 +28,8 @@ public class FalconsTeleOp extends LinearOpMode {
     public static MecanumDrive.Params DRIVE_PARAMS = new MecanumDrive.Params();
 
     private VoltageSensor voltageSensor;
+
+    LazyImu lazyImu;
 
 
     // The following code will run as soon as "INIT" is pressed on the Driver Station
@@ -38,6 +45,7 @@ public class FalconsTeleOp extends LinearOpMode {
         belt = (DcMotorEx) hardwareMap.dcMotor.get("belt");
         ball = (DcMotorEx) hardwareMap.dcMotor.get("intake");
         rhino = (DcMotorEx)  hardwareMap.dcMotor.get("launch_ball");
+        imu = lazyImu.get();
         // Use the following line as a template for defining new servos
         //Claw = (Servo) hardwareMap.servo.get("claw");
         pusher = (Servo) hardwareMap.servo.get("pusher");
