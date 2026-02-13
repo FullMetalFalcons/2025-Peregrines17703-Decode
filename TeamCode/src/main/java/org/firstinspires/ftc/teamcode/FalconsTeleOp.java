@@ -103,6 +103,7 @@ public class FalconsTeleOp extends LinearOpMode {
             double powerX = 0.0;  // Desired power for strafing           (-1 to 1)
             double powerY = 0.0;  // Desired power for forward/backward   (-1 to 1)
             double powerAng = 0.0;  // Desired power for turning          (-1 to 1)
+            //use these for H-Drive ^
 
             if (gamepad1.left_bumper && !lastLeftBumper)
             {
@@ -122,6 +123,7 @@ public class FalconsTeleOp extends LinearOpMode {
             // Set the desired powers based on joystick inputs (-1 to 1)
             powerX = gamepad1.left_stick_x;
             powerY = -gamepad1.left_stick_y;
+            //use this for H-Drive ^
 
 
             // Perform vector math to determine the desired powers for each wheel
@@ -129,19 +131,32 @@ public class FalconsTeleOp extends LinearOpMode {
             double powerLB = -powerX + powerY - powerAng;
             double powerRF = -powerX + powerY + powerAng;
             double powerRB = powerX + powerY + powerAng;
+            /* heres what to do for H-Drive
+            double powerLF = powerY - powerAng; its minus powerAng because you want the power to be negative when turning left, might need to change it to positive if it doesnt work
+            double powerRF = powerY + powerAng; might need to change it to - powerAng if it doesnt work right
+            double powerS = powerX;
+             */
 
             // Determine the greatest wheel power and set it to max
             double max = Math.max(1.0, Math.abs(powerLF));
+            //keep this line for H-Drive ^
             max = Math.max(max, Math.abs(powerRF));
             max = Math.max(max, Math.abs(powerLB));
             max = Math.max(max, Math.abs(powerRB));
+            // H-Drive stuff
+            /* max = Math.max(max, Math.abs(powerLF));
+                max = Math.max(max, Math.abs(powerRF));
+                max = Math.max(max, Math.abs(powerS));
+             */
 
             // Scale all power variables down to a number between 0 and 1 (so that setPower will accept them)
             powerLF /= max;
             powerLB /= max;
             powerRF /= max;
             powerRB /= max;
-            //gooofy lefty
+            // do this with the motors but change them to H-Drive names ^
+
+
 
             if (slowMode)
             {
@@ -164,6 +179,7 @@ public class FalconsTeleOp extends LinearOpMode {
                 motorLB.setPower(powerLB);
                 motorRF.setPower(powerRF);
                 motorRB.setPower(powerRB);
+                // do this but with H-Drive names ^
             }
 
 
